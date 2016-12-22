@@ -20,6 +20,100 @@ describe('jsonpatch to mongodb', function() {
     assert.deepEqual(toMongodb(patches), expected);
   });
 
+  it('should work with array set', function() {
+    var patches = [{
+      op: 'add',
+      path: '/name/1',
+      value: 'dave'
+    }];
+
+    var expected = {
+      $push: {
+        name: {
+          $each: [
+            'dave'
+          ],
+          $position: 1
+        }
+      }
+    };
+
+    assert.deepEqual(toMongodb(patches), expected);
+  });
+
+  it('should work with nested array set', function() {
+    var patches = [{
+      op: 'add',
+      path: '/variantOptions/0/options/5',
+      value: 'Extra Large'
+    }];
+
+    var expected = {
+      $push: {
+        'variantOptions.0.options': {
+          $each: [
+            'Extra Large'
+          ],
+          $position: 5
+        }
+      }
+    };
+
+    assert.deepEqual(toMongodb(patches), expected);
+  });
+
+  it('should work with multiple set', function() {
+    var patches = [{
+      op: 'add',
+      path: '/name/1',
+      value: 'dave'
+    }, {
+      op: 'add',
+      path: '/name/2',
+      value: 'bob'
+    }];
+
+    var expected = {
+      $push: {
+        name: {
+          $each: [
+            'dave',
+            'bob'
+          ],
+          $position: 1
+        }
+      }
+    };
+
+    assert.deepEqual(toMongodb(patches), expected);
+  });
+
+  it('should work with nested multiple set', function() {
+    var patches = [{
+      op: 'add',
+      path: '/variantOptions/0/options/5',
+      value: 'Extra Large'
+    }, {
+      op: 'add',
+      path: '/variantOptions/0/options/6',
+      value: 'Extra Medium'
+    }];
+
+    var expected = {
+      $push: {
+        'variantOptions.0.options': {
+          $each: [
+            'Extra Large',
+            'Extra Medium'
+          ],
+          $position: 5
+        }
+      }
+    };
+
+    assert.deepEqual(toMongodb(patches), expected);
+  });
+
   it('should work with multiple adds', function() {
     var patches = [{
       op: 'add',
